@@ -130,7 +130,7 @@ AWS_KNOWLEDGE_BASE_ID=
 ```
 
 ## Install the Teams Toolkit Extension for Visual Studio Code
-![Install the Teams Toolkit Extension for Visual Studio Code](./documentation/images/install-teamstoolkit.png)
+![Install the Teams Toolkit Extension for Visual Studio Code](./TeamsBedrock/documentation/images/install-teamstoolkit.png)
 
 ## Run the MS Teams App locally
 ```
@@ -138,16 +138,16 @@ cd azure_msteams_app
 npm install
 ```
 
-## Start Teams Toolkit
+## Start Microsoft 365 Agent Toolkit
 
 Click on the play icon
 
-![Start Teams Toolkit](./documentation/images/start-teamstoolkit.png)
+![Start Microsoft 365 Agent Toolkit](./TeamsBedrock/documentation/images/start-teamstoolkit.png)
 
 
 ## Example of the MS Teams App Chat
 
-![Example of the MS Teams App Chat](./documentation/images/example-of-chat.png)
+![Example of the MS Teams App Chat](./TeamsBedrock/documentation/images/example-of-chat.png)
 
 ## 🛠️ AWS Tools Used
 
