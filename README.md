@@ -2,9 +2,6 @@
 
 A comprehensive AI chatbot framework that integrates Microsoft Teams with AWS Bedrock agents, powered by AWS Lambda functions for scalable, serverless AI operations.
 
-## 🏆 AWS Lambda Hackathon Submission
-
-This project is submitted for the [AWS Lambda Hackathon](https://awslambdahackathon.devpost.com/?) - "Build solutions that scale: power your ideas with AWS Lambda"
 
 ## 🚀 How This Application Uses AWS Lambda
 
@@ -78,7 +75,7 @@ Our Lambda functions integrate with:
 - **IAM**: For secure access control and permissions
 
 ### Architecture Diagram
-![Architecture Diagram](./documentation/images/architecture_diagram.png)
+![Architecture Diagram](./TeamsBedrock/documentation/images/architecture_diagram.png)
 
 ## Azure MS Teams Appz
 Ensure you have node installed
