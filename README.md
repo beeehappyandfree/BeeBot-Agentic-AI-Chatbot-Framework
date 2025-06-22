@@ -2,6 +2,9 @@
 
 A comprehensive AI chatbot framework that integrates Microsoft Teams with AWS Bedrock agents, powered by AWS Lambda functions for scalable, serverless AI operations.
 
+## 🏆 AWS Lambda Hackathon Submission
+
+This project is submitted for the [AWS Lambda Hackathon](https://awslambdahackathon.devpost.com/?) - "Build solutions that scale: power your ideas with AWS Lambda"
 
 ## 🚀 How This Application Uses AWS Lambda
 
@@ -18,11 +21,37 @@ Each AI agent in our system uses dedicated Lambda functions to handle specific t
 - **Knowledge Base Sync Lambda** (`lambda/sync_bedrock_knowledgebase/`): Manages document ingestion and knowledge base updates
 
 #### 2. **Lambda Triggers and Integration**
-Our Lambda functions are triggered through:
+Our Lambda functions are triggered through multiple mechanisms:
 
+- **AWS Bedrock Agent Invocation**: Primary trigger - Bedrock agents directly invoke Lambda functions for action execution
+- **S3 Event Triggers**: **NEW!** - Knowledge base sync operations are automatically triggered when documents are uploaded to S3
 - **Direct Agent Invocation**: Bedrock agents directly invoke Lambda functions for action execution
 
-#### 3. **Serverless Best Practices Implementation**
+#### 3. **S3 Event Trigger Implementation** 🆕
+We've implemented **S3 Event Triggers** to demonstrate event-driven architecture:
+
+```python
+# Lambda function triggered by S3 OBJECT_CREATED events
+def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
+    # Extract S3 event information
+    s3_event = event.get('Records', [{}])[0].get('s3', {})
+    bucket_name = s3_event.get('bucket', {}).get('name')
+    object_key = s3_event.get('object', {}).get('key')
+    
+    # Automatically start ingestion job for new documents
+    response = bedrock_agent_client.start_ingestion_job(
+        dataSourceId=data_source_id,
+        knowledgeBaseId=knowledge_base_id
+    )
+```
+
+**Trigger Configuration:**
+- **Event Type**: `OBJECT_CREATED`
+- **Supported File Types**: `.pdf`, `.txt`, `.docx`, `.md`
+- **Automatic Processing**: New documents are automatically synced to Bedrock Knowledge Base
+- **Error Handling**: Comprehensive logging and error management
+
+#### 4. **Serverless Best Practices Implementation**
 We follow AWS Lambda best practices:
 
 ```typescript
@@ -37,7 +66,7 @@ export const handler = middy(adapter)
 - **Timeout Management**: 60-second timeouts for optimal performance
 - **Cold Start Optimization**: Node.js 20.x runtime for better performance
 
-#### 4. **Lambda Function Examples**
+#### 5. **Lambda Function Examples**
 
 **HackerNews Agent Lambda** - Demonstrates external API integration:
 ```typescript
@@ -61,13 +90,21 @@ case '/getCurrentTime':
   break;
 ```
 
-#### 5. **Scalability and Performance**
+**Knowledge Base Sync Lambda** - Demonstrates S3 event processing:
+```python
+# Triggered automatically when documents are uploaded to S3
+if file_extension not in [ext.replace('.', '') for ext in supported_extensions]:
+    logger.info(f"Skipping file {object_key} - unsupported file type: {file_extension}")
+    return {'statusCode': 200, 'body': json.dumps({'message': f'Skipped unsupported file type: {file_extension}'})}
+```
+
+#### 6. **Scalability and Performance**
 - **Auto-scaling**: Lambda functions automatically scale from 0 to thousands of concurrent executions
 - **Cost optimization**: Pay only for actual compute time used
 - **High availability**: Multi-AZ deployment with automatic failover
 - **Performance monitoring**: Real-time metrics and tracing
 
-#### 6. **Integration with AWS Services**
+#### 7. **Integration with AWS Services**
 Our Lambda functions integrate with:
 - **AWS Bedrock**: For AI model inference and agent orchestration
 - **Amazon S3**: For document storage and knowledge base management
@@ -77,7 +114,7 @@ Our Lambda functions integrate with:
 ### Architecture Diagram
 ![Architecture Diagram](./TeamsBedrock/documentation/images/architecture_diagram.png)
 
-## Azure MS Teams Appz
+## Azure MS Teams App
 Ensure you have node installed
 ```
 nvm install v18.20.2
@@ -153,9 +190,7 @@ Click on the play icon
 
 - **AWS Lambda**: Core serverless compute service for all agent operations
 - **AWS Bedrock**: AI model inference and agent orchestration
-- **Amazon API Gateway**: RESTful API endpoints and Lambda triggers
-- **AWS EventBridge**: Event-driven architecture for knowledge base sync
-- **Amazon S3**: Document storage and knowledge base management
+- **Amazon S3**: Document storage, knowledge base management, and event triggers
 - **AWS CloudWatch**: Monitoring, logging, and observability
 - **AWS IAM**: Security and access control
 - **AWS CDK**: Infrastructure as Code deployment
@@ -168,6 +203,7 @@ Our Lambda functions provide comprehensive metrics:
 - **ActionGroupQueryError**: Monitors error rates
 - **Execution Duration**: Performance monitoring
 - **Concurrent Executions**: Scalability tracking
+- **S3 Event Processing**: Document sync success/failure rates
 
 ## 🔒 Security Features
 
@@ -176,7 +212,18 @@ Our Lambda functions provide comprehensive metrics:
 - **Encryption at rest**: All data encrypted using AWS KMS
 - **API authentication**: Secure API Gateway endpoints
 - **Environment variable protection**: Sensitive data stored securely
+- **S3 bucket security**: Private buckets with encryption and access logging
 
-This application demonstrates how AWS Lambda can be used to build scalable, serverless AI applications that integrate seamlessly with enterprise communication platforms like Microsoft Teams.
+## 🆕 Event-Driven Architecture
+
+Our S3 event trigger demonstrates **event-driven serverless architecture**:
+
+1. **Document Upload**: User uploads document to S3 bucket
+2. **Automatic Trigger**: S3 OBJECT_CREATED event triggers Lambda function
+3. **Document Processing**: Lambda validates file type and starts ingestion job
+4. **Knowledge Base Update**: Bedrock Knowledge Base is automatically updated
+5. **Real-time Availability**: New documents are immediately available to AI agents
+
+This application demonstrates how AWS Lambda can be used to build scalable, serverless AI applications that integrate seamlessly with enterprise communication platforms like Microsoft Teams, featuring both **direct agent invocation** and **event-driven triggers**.
 
 

@@ -1,7 +1,10 @@
 import * as cdk from 'aws-cdk-lib';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as nodeLambda from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as path from 'path';
 import { Construct } from 'constructs';
 import { bedrock } from "@cdklabs/generative-ai-cdk-constructs";
@@ -18,6 +21,7 @@ export class KnowledgeBaseAgent extends Construct {
   public readonly knowledgeBase: bedrock.VectorKnowledgeBase;
   public readonly dataSource: bedrock.S3DataSource;
   public readonly docBucket: s3.Bucket;
+  public readonly syncLambda: lambda.Function;
 
   constructor(scope: Construct, id: string, props?: CommonAgentProps) {
     super(scope, id);
@@ -76,6 +80,100 @@ export class KnowledgeBaseAgent extends Construct {
     });
     addCommonTags(this.dataSource);
 
+    // Create Lambda function for S3 event processing
+    this.syncLambda = new lambda.Function(this, 'KnowledgeBaseSyncLambda', {
+      runtime: lambda.Runtime.PYTHON_3_11,
+      handler: 'lambda.lambda_handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, '../lambda/sync_bedrock_knowledgebase')),
+      timeout: cdk.Duration.minutes(5),
+      environment: {
+        KNOWLEDGE_BASE_ID: this.knowledgeBase.knowledgeBaseId,
+        DATA_SOURCE_ID: this.dataSource.dataSourceId,
+      },
+      description: 'Lambda function to automatically sync documents to Bedrock Knowledge Base when uploaded to S3',
+    });
+    addCommonTags(this.syncLambda);
+
+    // Grant Lambda permissions to access Bedrock Knowledge Base operations
+    this.syncLambda.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'bedrock-agent:StartIngestionJob',
+        'bedrock-agent:GetIngestionJob',
+        'bedrock-agent:ListIngestionJobs',
+        'bedrock-agent:GetKnowledgeBase',
+        'bedrock-agent:GetDataSource',
+        // Fallback permissions for regular bedrock service
+        'bedrock:StartIngestionJob',
+        'bedrock:GetIngestionJob',
+        'bedrock:ListIngestionJobs'
+      ],
+      resources: ['*']
+    }));
+
+    // Grant additional Bedrock permissions for model operations
+    this.syncLambda.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'bedrock:InvokeModel',
+        'bedrock:InvokeModelWithResponseStream',
+        'bedrock:ListFoundationModels',
+        'bedrock:GetFoundationModel'
+      ],
+      resources: ['*']
+    }));
+
+    // Grant permissions for bedrock-agent-runtime service
+    this.syncLambda.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'bedrock-agent-runtime:InvokeAgent',
+        'bedrock-agent-runtime:InvokeAgentAlias'
+      ],
+      resources: ['*']
+    }));
+
+    // Grant Lambda permissions to read from S3 bucket
+    this.docBucket.grantRead(this.syncLambda);
+
+    // Add S3 event trigger to the document bucket
+    this.docBucket.addEventNotification(
+      s3.EventType.OBJECT_CREATED,
+      new s3n.LambdaDestination(this.syncLambda),
+      {
+        prefix: '', // Trigger for all objects
+        suffix: '.pdf' // Only trigger for PDF files (you can add more suffixes)
+      }
+    );
+
+    // Add another trigger for other document types
+    this.docBucket.addEventNotification(
+      s3.EventType.OBJECT_CREATED,
+      new s3n.LambdaDestination(this.syncLambda),
+      {
+        prefix: '', // Trigger for all objects
+        suffix: '.txt' // Trigger for text files
+      }
+    );
+
+    this.docBucket.addEventNotification(
+      s3.EventType.OBJECT_CREATED,
+      new s3n.LambdaDestination(this.syncLambda),
+      {
+        prefix: '', // Trigger for all objects
+        suffix: '.docx' // Trigger for Word documents
+      }
+    );
+
+    this.docBucket.addEventNotification(
+      s3.EventType.OBJECT_CREATED,
+      new s3n.LambdaDestination(this.syncLambda),
+      {
+        prefix: '', // Trigger for all objects
+        suffix: '.md' // Trigger for Markdown files
+      }
+    );
+
     // Deploy documentation
     const assetsPath = path.join(__dirname, '../docs/');
     const assetDoc = s3deploy.Source.asset(assetsPath);
@@ -86,7 +184,7 @@ export class KnowledgeBaseAgent extends Construct {
     });
 
     // Create the Bedrock Agent
-    this.agent = new bedrock.Agent(this, 'your-unique-agent', {
+    this.agent = new bedrock.Agent(this, 'kbAgent', {
       foundationModel: bedrock.BedrockFoundationModel.ANTHROPIC_CLAUDE_HAIKU_V1_0,
       instruction: agentOptions.knowledgeBaseAgentOptions.instruction,
       knowledgeBases: [this.knowledgeBase],
@@ -117,12 +215,18 @@ export class KnowledgeBaseAgent extends Construct {
     
     // Create Agent Alias
     const timestamp = util.timestamp;
-    this.agentAlias = new CfnAgentAlias(this, 'your-unique-agent-alias', {
+    this.agentAlias = new CfnAgentAlias(this, 'kbAgentAlias', {
       agentId: this.agent.agentId,
       agentAliasName: util.sanitizeName(`knowledgebase-agent-alias-${timestamp}`)
     });
     addCommonTags(this.agentAlias);
 
+    // Output the Lambda function ARN for reference
+    new cdk.CfnOutput(this, 'KnowledgeBaseSyncLambdaArn', {
+      value: this.syncLambda.functionArn,
+      description: 'ARN of the Lambda function that syncs documents to Knowledge Base',
+      exportName: 'KnowledgeBaseSyncLambdaArn',
+    });
 
   }
 }
