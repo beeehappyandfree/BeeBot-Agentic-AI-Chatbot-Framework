@@ -13,19 +13,20 @@ This project is submitted for the [AWS Lambda Hackathon](https://awslambdahackat
 Our application leverages AWS Lambda as the backbone for all AI agent operations, implementing a **serverless microservices architecture** that scales automatically based on demand. Here's how we use AWS Lambda:
 
 #### 1. **Lambda Functions as Action Group Executors**
-Each AI agent in our system uses dedicated Lambda functions to handle specific tasks:
+Each AI agent in our system uses dedicated Lambda functions to handle specific tasks. **These are example implementations demonstrating the framework's capabilities:**
 
-- **HelloWorld Agent Lambda** (`lambda/helloWorld_agent/`): Handles basic greeting and demonstration operations
-- **HackerNews Agent Lambda** (`lambda/hacker_news_agent/`): Fetches and processes Hacker News data via external APIs
-- **Time Agent Lambda** (`lambda/time/`): Provides current time and date information
-- **Knowledge Base Sync Lambda** (`lambda/sync_bedrock_knowledgebase/`): Manages document ingestion and knowledge base updates
+- **HelloWorld Agent Lambda** (`lambda/helloWorld_agent/`): Example agent handling basic greeting and demonstration operations
+- **HackerNews Agent Lambda** (`lambda/hacker_news_agent/`): Example agent fetching and processing Hacker News data via external APIs
+- **Time Agent Lambda** (`lambda/time/`): Example agent providing current time and date information
+- **Knowledge Base Sync Lambda** (`lambda/sync_bedrock_knowledgebase/`): Example implementation for document ingestion and knowledge base updates
+
+**Framework Feature**: All Lambda functions use **OpenAPI specifications** to define their API schemas, enabling seamless integration with AWS Bedrock agents through standardized API contracts.
 
 #### 2. **Lambda Triggers and Integration**
 Our Lambda functions are triggered through multiple mechanisms:
 
 - **AWS Bedrock Agent Invocation**: Primary trigger - Bedrock agents directly invoke Lambda functions for action execution
-- **S3 Event Triggers**: **NEW!** - Knowledge base sync operations are automatically triggered when documents are uploaded to S3
-- **Direct Agent Invocation**: Bedrock agents directly invoke Lambda functions for action execution
+- **S3 Event Triggers**: - Knowledge base sync operations are automatically triggered when documents are uploaded to S3
 
 #### 3. **S3 Event Trigger Implementation** 🆕
 We've implemented **S3 Event Triggers** to demonstrate event-driven architecture:
@@ -66,9 +67,34 @@ export const handler = middy(adapter)
 - **Timeout Management**: 60-second timeouts for optimal performance
 - **Cold Start Optimization**: Node.js 20.x runtime for better performance
 
-#### 5. **Lambda Function Examples**
+#### 5. **Lambda Function Examples with OpenAPI Integration**
 
-**HackerNews Agent Lambda** - Demonstrates external API integration:
+**Framework Feature**: Each Lambda function includes an **OpenAPI specification** that defines the API schema for Bedrock agent integration:
+
+```json
+// Example OpenAPI spec from helloWorld_agent/schema/api-schema.json
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "HelloWorld Agent API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/getHelloWorld": {
+      "get": {
+        "summary": "Get hello world message",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+**HackerNews Agent Lambda** - Example demonstrating external API integration:
 ```typescript
 case '/getTopStories':
   if (httpMethod === 'GET') {
@@ -79,7 +105,7 @@ case '/getTopStories':
   break;
 ```
 
-**Time Agent Lambda** - Shows simple data processing:
+**Time Agent Lambda** - Example showing simple data processing:
 ```typescript
 case '/getCurrentTime':
   if (httpMethod === 'GET') {
@@ -90,7 +116,7 @@ case '/getCurrentTime':
   break;
 ```
 
-**Knowledge Base Sync Lambda** - Demonstrates S3 event processing:
+**Knowledge Base Sync Lambda** - Example demonstrating S3 event processing:
 ```python
 # Triggered automatically when documents are uploaded to S3
 if file_extension not in [ext.replace('.', '') for ext in supported_extensions]:
@@ -113,6 +139,27 @@ Our Lambda functions integrate with:
 
 ### Architecture Diagram
 ![Architecture Diagram](./TeamsBedrock/documentation/images/architecture_diagram.png)
+
+## 🛠️ Framework Features
+
+### **Extensible Agent System**
+The framework provides a **modular architecture** where you can easily create new AI agents by:
+1. **Defining OpenAPI specifications** for your Lambda functions
+2. **Implementing Lambda handlers** following the framework patterns
+3. **Configuring agent instructions** and capabilities
+4. **Deploying with CDK** for infrastructure as code
+
+### **OpenAPI Integration**
+- **Standardized API Contracts**: All Lambda functions use OpenAPI 3.0 specifications
+- **Automatic Agent Integration**: Bedrock agents automatically understand function capabilities
+- **Type Safety**: Strong typing and validation through OpenAPI schemas
+- **Documentation**: Self-documenting APIs through OpenAPI specs
+
+### **Event-Driven Architecture**
+- **S3 Triggers**: Automatic document processing workflows
+- **Scalable Processing**: Handle multiple concurrent uploads
+- **Error Handling**: Comprehensive retry and dead letter queues
+- **Monitoring**: Real-time metrics and observability
 
 ## Azure MS Teams App
 Ensure you have node installed
@@ -224,6 +271,15 @@ Our S3 event trigger demonstrates **event-driven serverless architecture**:
 4. **Knowledge Base Update**: Bedrock Knowledge Base is automatically updated
 5. **Real-time Availability**: New documents are immediately available to AI agents
 
-This application demonstrates how AWS Lambda can be used to build scalable, serverless AI applications that integrate seamlessly with enterprise communication platforms like Microsoft Teams, featuring both **direct agent invocation** and **event-driven triggers**.
+## 🚀 Getting Started with Custom Agents
+
+To create your own AI agent using this framework:
+
+1. **Define your API schema** in OpenAPI 3.0 format
+2. **Implement Lambda function** following the framework patterns
+3. **Configure agent instructions** and capabilities
+4. **Deploy with CDK** for automated infrastructure
+
+This application demonstrates how AWS Lambda can be used to build scalable, serverless AI applications that integrate seamlessly with enterprise communication platforms like Microsoft Teams, featuring both **direct agent invocation** and **event-driven triggers**. The framework provides a **foundation for building custom AI agents** with standardized patterns and best practices.
 
 
