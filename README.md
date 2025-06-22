@@ -186,6 +186,19 @@ cd aws_bedrock
 npm install
 ```
 
+## Start Docker Engine
+Docker is required for CDK deployment and Lambda function bundling. Start Docker before proceeding:
+
+### Start Docker Desktop:
+1. **Open Docker Desktop** from your Applications/Start Menu
+2. **Wait for Docker to start** (you'll see the Docker icon in your system tray)
+3. **Verify it's running** by opening a terminal and running:
+   ```bash
+   docker --version
+   ```
+
+That's it! Docker is now ready for CDK deployment.
+
 ## Replace the AWS Bedrock AI Agent and AI Agent Alias Name
 In the file `aws_bedrock/lib/aws_bedrock-stack.ts`, replace the AI Agent and AI Agent Alias Name with your own.
 Search for `your-unique-agent-alias` and replace it with your own.
