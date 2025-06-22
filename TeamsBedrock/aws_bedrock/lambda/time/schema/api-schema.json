@@ -1,0 +1,39 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Time API",
+      "version": "1.0.0",
+      "description": "API for retrieving current time information."
+    },
+    "paths": {
+      "/getCurrentTime": {
+        "get": {
+          "summary": "Get current time",
+          "description": "Get the current time in ISO format",
+          "operationId": "getCurrentTime",
+          "responses": {
+            "200": {
+              "description": "Successfully retrieved current time",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "currentTime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Current time in ISO format"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal server error"
+            }
+          }
+        }
+      }
+    }
+}

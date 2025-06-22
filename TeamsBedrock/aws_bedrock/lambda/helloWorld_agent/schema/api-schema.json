@@ -1,0 +1,43 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Hello World API",
+      "version": "1.0.0",
+      "description": "API for retrieving Hello World information."
+    },
+    "paths": {
+      "/getHelloWorld": {
+        "get": {
+          "summary": "Get Hello World message",
+          "description": "Get a Hello World message",
+          "operationId": "getHelloWorld",
+          "responses": {
+            "200": {
+              "description": "Successfully retrieved Hello World message",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string",
+                        "description": "Hello World message"
+                      },
+                      "timestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Timestamp of when the message was generated"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal server error"
+            }
+          }
+        }
+      }
+    }
+}

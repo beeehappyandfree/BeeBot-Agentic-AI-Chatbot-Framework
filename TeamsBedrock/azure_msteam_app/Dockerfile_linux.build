@@ -1,0 +1,12 @@
+FROM node:20.9.0-bullseye
+
+WORKDIR /app
+
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
+RUN npm install -g @microsoft/teamsapp-cli
+
+ENV AZURE_CORE_NO_BROWSER=true
+
+ENTRYPOINT ["/bin/sh", "-c"]
+CMD ["teamsapp"]

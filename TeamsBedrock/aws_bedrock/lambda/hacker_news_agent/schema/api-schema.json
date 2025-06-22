@@ -1,0 +1,127 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Hacker News API",
+    "version": "1.0.0",
+    "description": "API for retrieving Hacker News stories and articles."
+  },
+  "paths": {
+    "/getTopStories": {
+      "get": {
+        "summary": "Get top stories from Hacker News",
+        "description": "Retrieves a list of top story IDs from Hacker News",
+        "operationId": "getTopStories",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of stories to return",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved top stories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "stories": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "description": "Story ID"
+                      },
+                      "description": "List of top story IDs"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/getArticle": {
+      "get": {
+        "summary": "Get article details by ID",
+        "description": "Retrieves detailed information about a specific Hacker News article",
+        "operationId": "getArticle",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "ID of the article to retrieve",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved article details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "Article ID"
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "Article title"
+                    },
+                    "url": {
+                      "type": "string",
+                      "description": "URL of the article"
+                    },
+                    "by": {
+                      "type": "string",
+                      "description": "Username of the submitter"
+                    },
+                    "score": {
+                      "type": "integer",
+                      "description": "Score of the article"
+                    },
+                    "time": {
+                      "type": "integer",
+                      "description": "Unix timestamp of when the article was submitted"
+                    },
+                    "descendants": {
+                      "type": "integer",
+                      "description": "Number of comments"
+                    },
+                    "kids": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      },
+                      "description": "IDs of the top-level comments"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Article not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  }
+}

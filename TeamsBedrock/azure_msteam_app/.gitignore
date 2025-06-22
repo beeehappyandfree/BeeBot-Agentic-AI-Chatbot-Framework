@@ -1,0 +1,29 @@
+# TeamsFx files
+env/.env.*.user
+env/.env.local
+env/.env.*
+.DS_Store
+build
+appPackage/build
+app.dev.zip
+
+
+# dependencies
+node_modules/
+
+# misc
+.env
+.deployment
+.DS_Store
+
+# build
+lib/
+
+# Local data
+.localConfigs.testTool
+.localConfigs
+.notification.localstore.json
+.notification.testtoolstore.json
+
+# Dev tool directories
+/devTools/
